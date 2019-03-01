@@ -71,6 +71,9 @@ import net.runelite.client.ui.SplashScreen;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayRenderer;
 import net.runelite.client.ui.overlay.WidgetOverlay;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowManager;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowMinimapOverlay;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowOverlay;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxOverlay;
 import net.runelite.client.ui.overlay.tooltip.TooltipOverlay;
@@ -158,6 +161,12 @@ public class RuneLite
 	private Provider<WorldMapOverlay> worldMapOverlay;
 
 	@Inject
+	private Provider<HintArrowOverlay> hintArrowOverlay;
+
+	@Inject
+	private Provider<HintArrowMinimapOverlay> hintArrowMinimapOverlay;
+
+	@Inject
 	private Provider<LootManager> lootManager;
 
 	@Inject
@@ -165,6 +174,9 @@ public class RuneLite
 
 	@Inject
 	private Provider<Hooks> hooks;
+
+	@Inject
+	private Provider<HintArrowManager> hintArrowManager;
 
 	@Inject
 	@Nullable
@@ -352,12 +364,15 @@ public class RuneLite
 			eventBus.register(lootManager.get());
 			eventBus.register(chatboxPanelManager.get());
 			eventBus.register(hooks.get());
+			eventBus.register(hintArrowManager.get());
 
 			// Add core overlays
 			WidgetOverlay.createOverlays(client).forEach(overlayManager::add);
 			overlayManager.add(infoBoxOverlay.get());
 			overlayManager.add(worldMapOverlay.get());
 			overlayManager.add(tooltipOverlay.get());
+			overlayManager.add(hintArrowOverlay.get());
+			overlayManager.add(hintArrowMinimapOverlay.get());
 		}
 
 		// Start plugins
