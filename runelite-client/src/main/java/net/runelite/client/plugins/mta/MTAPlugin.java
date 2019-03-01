@@ -103,6 +103,8 @@ public class MTAPlugin extends Plugin
 		}
 
 		telekineticRoom.resetRoom();
+		alchemyRoom.resetRoom();
+		enchantmentRoom.resetRoom();
 	}
 
 }

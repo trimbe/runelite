@@ -42,6 +42,8 @@ import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.mta.MTAConfig;
 import net.runelite.client.plugins.mta.MTARoom;
+import net.runelite.client.ui.overlay.hintarrow.HintArrow;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowManager;
 
 @Slf4j
 public class EnchantmentRoom extends MTARoom
@@ -49,13 +51,22 @@ public class EnchantmentRoom extends MTARoom
 	private static final int MTA_ENCHANT_REGION = 13462;
 
 	private final Client client;
+	private final HintArrowManager hintArrowManager;
+
 	private final List<WorldPoint> dragonstones = new ArrayList<>();
+	private HintArrow activeHintArrow;
 
 	@Inject
-	private EnchantmentRoom(MTAConfig config, Client client)
+	private EnchantmentRoom(MTAConfig config, Client client, HintArrowManager hintArrowManager)
 	{
 		super(config);
 		this.client = client;
+		this.hintArrowManager = hintArrowManager;
+	}
+
+	public void resetRoom()
+	{
+		hintArrowManager.remove(activeHintArrow);
 	}
 
 	@Subscribe
@@ -78,11 +89,12 @@ public class EnchantmentRoom extends MTARoom
 		WorldPoint nearest = findNearestStone();
 		if (nearest != null)
 		{
-			client.setHintArrow(nearest);
+			hintArrowManager.remove(activeHintArrow);
+			activeHintArrow = hintArrowManager.add(nearest);
 		}
 		else
 		{
-			client.clearHintArrow();
+			hintArrowManager.remove(activeHintArrow);
 		}
 	}
 

@@ -62,6 +62,8 @@ import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.mta.MTAConfig;
 import net.runelite.client.plugins.mta.MTARoom;
+import net.runelite.client.ui.overlay.hintarrow.HintArrow;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowManager;
 
 @Slf4j
 public class TelekineticRoom extends MTARoom
@@ -71,6 +73,7 @@ public class TelekineticRoom extends MTARoom
 	private static final int TELEKINETIC_FINISH = NullObjectID.NULL_23672;
 
 	private final Client client;
+	private final HintArrowManager hintArrowManager;
 
 	private final List<WallObject> telekineticWalls = new ArrayList<>();
 
@@ -81,18 +84,21 @@ public class TelekineticRoom extends MTARoom
 	private Rectangle bounds;
 	private NPC guardian;
 	private Maze maze;
+	private HintArrow activeHintArrow;
 
 	@Inject
-	private TelekineticRoom(MTAConfig config, Client client)
+	private TelekineticRoom(MTAConfig config, Client client, HintArrowManager hintArrowManager)
 	{
 		super(config);
 		this.client = client;
+		this.hintArrowManager = hintArrowManager;
 	}
 
 	public void resetRoom()
 	{
 		finishLocation = null;
 		telekineticWalls.clear();
+		hintArrowManager.remove(activeHintArrow);
 	}
 
 	@Subscribe
@@ -144,7 +150,7 @@ public class TelekineticRoom extends MTARoom
 		{
 			bounds = getBounds(telekineticWalls.toArray(new WallObject[0]));
 			maze = Maze.fromWalls(telekineticWalls.size());
-			client.clearHintArrow();
+			hintArrowManager.remove(activeHintArrow);
 		}
 		else if (guardian != null)
 		{
@@ -172,7 +178,7 @@ public class TelekineticRoom extends MTARoom
 
 			if (location.equals(finishLocation))
 			{
-				client.clearHintArrow();
+				hintArrowManager.remove(activeHintArrow);
 			}
 			else
 			{
@@ -183,7 +189,7 @@ public class TelekineticRoom extends MTARoom
 		}
 		else
 		{
-			client.clearHintArrow();
+			hintArrowManager.remove(activeHintArrow);
 			moves.clear();
 		}
 	}
@@ -247,7 +253,8 @@ public class TelekineticRoom extends MTARoom
 
 				if (optimal != null)
 				{
-					client.setHintArrow(optimal);
+					hintArrowManager.remove(activeHintArrow);
+					activeHintArrow = hintArrowManager.add(optimal);
 					renderWorldPoint(graphics2D, optimal);
 				}
 			}

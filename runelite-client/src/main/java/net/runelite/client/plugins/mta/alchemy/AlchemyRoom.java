@@ -70,6 +70,8 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.mta.MTAConfig;
 import net.runelite.client.plugins.mta.MTAPlugin;
 import net.runelite.client.plugins.mta.MTARoom;
+import net.runelite.client.ui.overlay.hintarrow.HintArrow;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 
 @Slf4j
@@ -93,18 +95,22 @@ public class AlchemyRoom extends MTARoom
 	private final Client client;
 	private final ItemManager itemManager;
 	private final InfoBoxManager infoBoxManager;
+	private final HintArrowManager hintArrowManager;
 
 	private AlchemyItem best;
 	private Cupboard suggestion;
+	private HintArrow activeHintArrow;
 
 	@Inject
-	private AlchemyRoom(Client client, MTAConfig config, MTAPlugin plugin, ItemManager itemManager, InfoBoxManager infoBoxManager)
+	private AlchemyRoom(Client client, MTAConfig config, MTAPlugin plugin, ItemManager itemManager,
+						InfoBoxManager infoBoxManager, HintArrowManager hintArrowManager)
 	{
 		super(config);
 		this.client = client;
 		this.plugin = plugin;
 		this.itemManager = itemManager;
 		this.infoBoxManager = infoBoxManager;
+		this.hintArrowManager = hintArrowManager;
 	}
 
 	@Subscribe
@@ -112,6 +118,7 @@ public class AlchemyRoom extends MTARoom
 	{
 		if (!inside() || !config.alchemy())
 		{
+			hintArrowManager.remove(activeHintArrow);
 			return;
 		}
 
@@ -220,7 +227,7 @@ public class AlchemyRoom extends MTARoom
 		{
 			if (!inside())
 			{
-				reset();
+				resetRoom();
 			}
 		}
 	}
@@ -273,9 +280,10 @@ public class AlchemyRoom extends MTARoom
 	}
 
 
-	private void reset()
+	public void resetRoom()
 	{
 		Arrays.fill(cupboards, null);
+		hintArrowManager.remove(activeHintArrow);
 	}
 
 	@Override
@@ -379,7 +387,8 @@ public class AlchemyRoom extends MTARoom
 
 			if (alchemyItem == best)
 			{
-				client.setHintArrow(object.getWorldLocation());
+				hintArrowManager.remove(activeHintArrow);
+				activeHintArrow  = hintArrowManager.add(object.getWorldLocation());
 				found = true;
 			}
 
@@ -394,7 +403,8 @@ public class AlchemyRoom extends MTARoom
 
 		if (!found && suggestion != null)
 		{
-			client.setHintArrow(suggestion.gameObject.getWorldLocation());
+			hintArrowManager.remove(activeHintArrow);
+			activeHintArrow = hintArrowManager.add(suggestion.gameObject.getWorldLocation());
 		}
 
 	}
