@@ -932,4 +932,7 @@ public interface RSClient extends RSGameEngine, Client
 
 	@Import("getEnum")
 	RSEnum getRsEnum(int id);
+
+	@Import("currentTargetNoun")
+	String getCurrentTargetNoun();
 }

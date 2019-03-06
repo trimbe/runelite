@@ -24,6 +24,7 @@
  */
 package net.runelite.mixins;
 
+import com.google.common.base.Strings;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import net.runelite.api.Point;
 import net.runelite.api.WidgetNode;
 import net.runelite.api.events.WidgetHiddenChanged;
 import net.runelite.api.events.WidgetPositioned;
+import net.runelite.api.events.WidgetTextChanged;
 import net.runelite.api.mixins.FieldHook;
 import net.runelite.api.mixins.Inject;
 import net.runelite.api.mixins.Mixin;
@@ -67,6 +69,9 @@ public abstract class RSWidgetMixin implements RSWidget
 
 	@Inject
 	private int rl$y;
+
+	@Inject
+	private String prevText;
 
 	@Inject
 	RSWidgetMixin()
@@ -577,5 +582,20 @@ public abstract class RSWidgetMixin implements RSWidget
 		{
 			Arrays.fill(getChildren(), null);
 		}
+	}
+
+	@FieldHook("text")
+	@Inject
+	public void textChanged(int idx)
+	{
+		if (!Strings.isNullOrEmpty(getText()))
+		{
+			WidgetTextChanged textChanged = new WidgetTextChanged();
+			textChanged.setWidget(this);
+
+			client.getCallbacks().post(textChanged);
+		}
+
+		prevText = getText();
 	}
 }

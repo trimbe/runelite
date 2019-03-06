@@ -1,0 +1,93 @@
+{
+	"quest": "X Marks the Spot",
+	"steps": [
+		{
+			"name": "Talk to Veos to start the quest.",
+			"npcId": 8484,
+			"npcLocation": "3228, 3242, 0",
+			"conditions": [
+				{
+					"type": "VARBIT_CHANGED",
+					"id": 8063,
+					"value": 2
+				}
+			],
+			"dialogOptions": [
+				"I'm looking for a quest.",
+				"Sounds good, what should I do?"
+			]
+		},
+		{
+			"name": "Dig north of Bob's axe shop",
+			"location": "3230, 3209, 0",
+			"conditions": [
+				{
+					"type": "VARBIT_CHANGED",
+					"id": 8063,
+					"value": 3
+				},
+				{
+					"type": "ITEM",
+					"id": 23068
+				}
+			]
+		},
+		{
+			"name": "Dig next to Lumbridge castle's back door.",
+			"location": "3203, 3212, 0",
+			"conditions": [
+				{
+					"type": "VARBIT_CHANGED",
+					"id": 8063,
+					"value": 4
+				},
+				{
+					"type": "ITEM",
+					"id": 23069
+				}
+			]
+		},
+		{
+			"name": "Dig north-west of the Draynor Village jail.",
+			"location": "3183, 3225, 0",
+			"conditions": [
+				{
+					"type": "VARBIT_CHANGED",
+					"id": 8063,
+					"value": 5
+				},
+				{
+					"type": "ITEM",
+					"id": 23070
+				}
+			]
+		},
+		{
+			"name": "Dig in the pig pen north of Draynor Village market.",
+			"location": "3077, 3260, 0",
+			"conditions": [
+				{
+					"type": "VARBIT_CHANGED",
+					"id": 8063,
+					"value": 6
+				},
+				{
+					"type": "ITEM",
+					"id": 23071
+				}
+			]
+		},
+		{
+			"name": "Talk to Veos in Port Sarim",
+			"npcId": 8484,
+			"npcLocation": "3054, 3245, 0",
+			"conditions": [
+				{
+					"type": "VARBIT_CHANGED",
+					"id": 8063,
+					"value": 8
+				}
+			]
+		}
+	]
+}
