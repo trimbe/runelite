@@ -48,7 +48,11 @@ public enum HintArrowType
 	/**
 	 * Hint arrow is pointing at a position in the world.
 	 */
-	WORLD_POSITION(2);
+	WORLD_POSITION(2),
+	/**
+	 * Hint arrow is positioned above a GameObject
+	 */
+	GAME_OBJECT(11);
 
 	/**
 	 * The raw type value.
