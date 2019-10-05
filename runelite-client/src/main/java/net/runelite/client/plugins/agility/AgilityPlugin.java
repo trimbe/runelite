@@ -24,24 +24,37 @@
  */
 package net.runelite.client.plugins.agility;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.GameObject;
 import net.runelite.api.ItemID;
 import static net.runelite.api.ItemID.AGILITY_ARENA_TICKET;
+import static net.runelite.api.NullObjectID.NULL_36241;
+import static net.runelite.api.NullObjectID.NULL_36242;
+import static net.runelite.api.NullObjectID.NULL_36243;
+import static net.runelite.api.NullObjectID.NULL_36244;
+import static net.runelite.api.NullObjectID.NULL_36245;
+import static net.runelite.api.NullObjectID.NULL_36246;
+import net.runelite.api.ObjectComposition;
+import net.runelite.api.ObjectID;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import static net.runelite.api.Skill.AGILITY;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
 import net.runelite.api.TileObject;
+import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.BoostedLevelChanged;
 import net.runelite.api.events.ConfigChanged;
@@ -59,6 +72,7 @@ import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemSpawned;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WallObjectChanged;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
@@ -81,6 +95,8 @@ import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 public class AgilityPlugin extends Plugin
 {
 	private static final int AGILITY_ARENA_REGION_ID = 11157;
+	private static final Set<Integer> PRIF_PORTALS = ImmutableSet.of(NULL_36241, NULL_36242, NULL_36243,
+		NULL_36244, NULL_36245, NULL_36246);
 
 	@Getter
 	private final Map<TileObject, Obstacle> obstacles = new HashMap<>();
@@ -121,6 +137,8 @@ public class AgilityPlugin extends Plugin
 	@Getter
 	private int agilityLevel;
 
+	private Set<GameObject> scenePortals = new HashSet<>();
+
 	@Provides
 	AgilityConfig getConfig(ConfigManager configManager)
 	{
@@ -142,8 +160,15 @@ public class AgilityPlugin extends Plugin
 		overlayManager.remove(lapCounterOverlay);
 		marksOfGrace.clear();
 		obstacles.clear();
+		scenePortals.clear();
 		session = null;
 		agilityLevel = 0;
+
+		GameObject hintArrowObj = client.getHintArrowObject();
+		if (hintArrowObj != null && PRIF_PORTALS.contains(hintArrowObj.getId()))
+		{
+			client.clearHintArrow();
+		}
 	}
 
 	@Subscribe
@@ -160,6 +185,7 @@ public class AgilityPlugin extends Plugin
 			case LOADING:
 				marksOfGrace.clear();
 				obstacles.clear();
+				scenePortals.clear();
 				break;
 			case LOGGED_IN:
 				if (!isInAgilityArena())
@@ -304,9 +330,38 @@ public class AgilityPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onVarbitChanged(VarbitChanged event)
+	{
+		if (client.getVar(Varbits.PRIFDDINAS_PORTAL_STATE) != 0)
+		{
+			for (GameObject portal : scenePortals)
+			{
+				ObjectComposition portalComp = client.getObjectDefinition(portal.getId());
+				if (portalComp.getImpostor() != null && portalComp.getImpostor().getId() == ObjectID.PORTAL_36240)
+				{
+					client.setHintArrow(portal);
+				}
+			}
+		}
+		else
+		{
+			GameObject hintArrowObj = client.getHintArrowObject();
+			if (hintArrowObj != null && PRIF_PORTALS.contains(hintArrowObj.getId()))
+			{
+				client.clearHintArrow();
+			}
+		}
+	}
+
+	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
 		onTileObject(event.getTile(), null, event.getGameObject());
+
+		if (PRIF_PORTALS.contains(event.getGameObject().getId()))
+		{
+			scenePortals.add(event.getGameObject());
+		}
 	}
 
 	@Subscribe
@@ -319,6 +374,15 @@ public class AgilityPlugin extends Plugin
 	public void onGameObjectDespawned(GameObjectDespawned event)
 	{
 		onTileObject(event.getTile(), event.getGameObject(), null);
+
+		if (PRIF_PORTALS.contains(event.getGameObject().getId()))
+		{
+			scenePortals.remove(event.getGameObject());
+			if (client.getHintArrowObject() == event.getGameObject())
+			{
+				client.clearHintArrow();
+			}
+		}
 	}
 
 	@Subscribe

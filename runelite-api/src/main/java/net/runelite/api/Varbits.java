@@ -499,7 +499,13 @@ public enum Varbits
 	EXPLORER_RING_ALCHS(4554),
 	EXPLORER_RING_RUNENERGY(4553),
 
-	WINTERTODT_TIMER(7980);
+	WINTERTODT_TIMER(7980),
+
+	/**
+	 * The currently active portal on the Prifddinas agility course
+	 * 0 is inactive, 1-6 corresponding to each of the 6 portals on the course
+	 */
+	PRIFDDINAS_PORTAL_STATE(9298);
 
 	/**
 	 * The raw varbit ID.
