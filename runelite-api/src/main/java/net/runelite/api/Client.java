@@ -1345,6 +1345,8 @@ public interface Client extends GameEngine
 	 */
 	void setHintArrow(NPC npc);
 
+	void setHintArrow(GameObject object);
+
 	/**
 	 * Gets the world point that the hint arrow is directed at.
 	 *
@@ -1365,6 +1367,9 @@ public interface Client extends GameEngine
 	 * @return hint arrow target
 	 */
 	NPC getHintArrowNpc();
+
+	@Nullable
+	GameObject getHintArrowObject();
 
 	/**
 	 * Checks whether animation smoothing is enabled for players.
