@@ -47,8 +47,11 @@ import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.ScriptID;
+import net.runelite.api.SpriteID;
 import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
+import net.runelite.api.events.ScriptPostFired;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.api.events.DraggingWidgetChanged;
 import net.runelite.api.events.FocusChanged;
@@ -455,6 +458,86 @@ public class BankTagsPlugin extends Plugin implements MouseWheelListener, KeyLis
 				clientThread.invokeLater(tabInterface::destroy);
 			}
 		}
+	}
+
+	private boolean isSearching()
+	{
+		return client.getVar(VarClientInt.INPUT_TYPE) == InputType.SEARCH.getType()
+			|| (client.getVar(VarClientInt.INPUT_TYPE) <= 0
+			&& client.getVar(VarClientStr.INPUT_TEXT) != null && client.getVar(VarClientStr.INPUT_TEXT).length() > 0);
+	}
+
+	@Subscribe
+	public void onScriptPostFired(ScriptPostFired event)
+	{
+		// allow time for the tab interface to become active
+		clientThread.invokeLater(() ->
+		{
+			if (event.getScriptId() != ScriptID.BANKMAIN_BUILD || !isSearching() || !tabInterface.isActive())
+			{
+				return;
+			}
+
+			Widget itemContainer = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
+			if (itemContainer == null)
+			{
+				return;
+			}
+
+			int items = 0;
+			int itemsPerRow = 8;
+			int itemVerticalSpacing = 36;
+			int itemHorizontalSpacing = 48;
+			int itemRowStart = 51;
+
+			Widget[] containerChildren = itemContainer.getDynamicChildren();
+
+			// sort the child array as the items are not in the displayed order
+			Arrays.sort(containerChildren, (a, b) ->
+			{
+				int yDiff = a.getOriginalY() - b.getOriginalY();
+
+				if (yDiff == 0)
+				{
+					return a.getOriginalX() - b.getOriginalX();
+				}
+				else
+				{
+					return yDiff;
+				}
+			});
+
+			for (Widget child : containerChildren)
+			{
+				if (child.getItemId() != -1 && !child.isHidden())
+				{
+					// calculate correct item position as if this was a normal tab
+					int adjYOffset = (items / itemsPerRow) * itemVerticalSpacing;
+					int adjXOffset = (items % itemsPerRow)  * itemHorizontalSpacing + itemRowStart;
+
+					if (child.getOriginalY() != adjYOffset)
+					{
+						child.setOriginalY(adjYOffset);
+						child.revalidate();
+					}
+
+					if (child.getOriginalX() != adjXOffset)
+					{
+						child.setOriginalX(adjXOffset);
+						child.revalidate();
+					}
+
+					items++;
+				}
+
+				// separator line or tab text
+				if (child.getSpriteId() == SpriteID.RESIZEABLE_MODE_SIDE_PANEL_BACKGROUND
+					|| child.getText().contains("Tab"))
+				{
+					child.setHidden(true);
+				}
+			}
+		});
 	}
 
 	@Subscribe

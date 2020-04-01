@@ -265,4 +265,7 @@ public final class ScriptID
 	 */
 	@ScriptArguments(integer = 7)
 	public static final int IGNORE_UPDATE = 630;
+
+	@ScriptArguments(integer = 0)
+	public static final int BANKMAIN_BUILD = 277;
 }
