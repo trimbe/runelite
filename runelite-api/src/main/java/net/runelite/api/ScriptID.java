@@ -223,6 +223,12 @@ public final class ScriptID
 	public static final int GE_OFFERS_SETUP_BUILD = 779;
 
 	/**
+	 * Determines whether to rebuild the search widget for the grand exchange
+	 */
+	@ScriptArguments(integer = 3)
+	public static final int GE_ITEM_SEARCH_DETERMINE_REBUILD = 751;
+
+	/**
 	 * Builds the grand exchange item search widget
 	 */
 	@ScriptArguments(integer = 3)

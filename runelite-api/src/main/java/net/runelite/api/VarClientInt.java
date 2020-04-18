@@ -62,6 +62,11 @@ public enum VarClientInt
 
 	INVENTORY_TAB(171),
 
+	/**
+	 * Number of client ticks before the GE search widget is updated after a key is pressed
+	 */
+	GE_SEARCH_REFRESH_TIMEOUT(66),
+
 	WORLD_MAP_SEARCH_FOCUSED(190);
 
 	private final int index;

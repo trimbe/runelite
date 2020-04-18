@@ -61,6 +61,7 @@ import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
+import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.FocusChanged;
@@ -70,6 +71,7 @@ import net.runelite.api.events.GrandExchangeSearched;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.ScriptPostFired;
+import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
@@ -179,6 +181,7 @@ public class GrandExchangePlugin extends Plugin
 	private GrandExchangeClient grandExchangeClient;
 
 	private boolean wasFuzzySearch;
+	private String geSearchString;
 
 	/**
 	 * Logic from {@link org.apache.commons.text.similarity.FuzzyScore}
@@ -290,6 +293,7 @@ public class GrandExchangePlugin extends Plugin
 		grandExchangeText = null;
 		grandExchangeItem = null;
 		grandExchangeClient = null;
+		geSearchString = null;
 	}
 
 	@Subscribe
@@ -515,6 +519,26 @@ public class GrandExchangePlugin extends Plugin
 		else if (event.getScriptId() == ScriptID.GE_ITEM_SEARCH && config.highlightSearchMatch())
 		{
 			highlightSearchMatches();
+		}
+	}
+
+	@Subscribe
+	public void onScriptPreFired(ScriptPreFired event)
+	{
+		if (event.getScriptId() != ScriptID.GE_ITEM_SEARCH_DETERMINE_REBUILD)
+		{
+			return;
+		}
+
+		// GE search normally rebuilds only 20 client ticks after a key is pressed
+		// this script decrements a varcint every tick until it reaches 0, at which point it will rebuild
+		// if the input has changed, we instead set the varcint to 1 so the rebuild will happen this script run
+		String inputText = client.getVar(VarClientStr.INPUT_TEXT);
+		if (inputText != geSearchString
+			&& client.getVar(VarClientInt.GE_SEARCH_REFRESH_TIMEOUT) > 1)
+		{
+			client.setVar(VarClientInt.GE_SEARCH_REFRESH_TIMEOUT, 1);
+			geSearchString = inputText;
 		}
 	}
 
