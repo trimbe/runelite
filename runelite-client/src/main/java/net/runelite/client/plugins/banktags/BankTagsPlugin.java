@@ -466,13 +466,6 @@ public class BankTagsPlugin extends Plugin implements MouseWheelListener
 		}
 	}
 
-	private boolean isSearching()
-	{
-		return client.getVar(VarClientInt.INPUT_TYPE) == InputType.SEARCH.getType()
-			|| (client.getVar(VarClientInt.INPUT_TYPE) <= 0
-			&& !Strings.isNullOrEmpty(client.getVar(VarClientStr.INPUT_TEXT)));
-	}
-
 	@Subscribe
 	public void onScriptPreFired(ScriptPreFired event)
 	{
@@ -507,7 +500,7 @@ public class BankTagsPlugin extends Plugin implements MouseWheelListener
 		// allow time for the tab interface to become active
 		clientThread.invokeLater(() ->
 		{
-			if (!isSearching() || !tabInterface.isActive())
+			if (!tabInterface.isActive())
 			{
 				return;
 			}
